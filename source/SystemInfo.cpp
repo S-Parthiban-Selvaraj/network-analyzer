@@ -171,12 +171,3 @@ int systemInfo::getRunningProcesses()
     return TotalProcesses;
 }
 
-int main()
-{
-    systemInfo sysInfo;
-    cout << "*********** mem free info " << sysInfo.getFreeMemory() << endl;
-    cout << " ************ Used memeory info " << sysInfo.getUsedMemory() << endl;
-    cout << " ************ Total Process info " << sysInfo.getRunningProcesses() << endl;
-
-    return 0;
-}
