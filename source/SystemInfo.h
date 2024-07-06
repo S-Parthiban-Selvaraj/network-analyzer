@@ -3,7 +3,8 @@
 
 class systemInfo{
     public:
-        unsigned long getFreeMem();
+        unsigned long getFreeMemory();
+        unsigned long getUsedMemory();
 };
 
 #endif
