@@ -20,7 +20,7 @@ using namespace std;
  * @note : This funtion is written for Linux OS.
  * @warning 
  */
-unsigned long systemInfo::getFreeMemory()
+unsigned long SystemInfo::getFreeMemory()
 {
     unsigned long FreeMemory = 0;
     int fd = open(MEM_INFO_FILE, O_RDONLY);
@@ -70,7 +70,7 @@ unsigned long systemInfo::getFreeMemory()
  * @note : This funtion is written for Linux OS.
  * @warning 
  */
-unsigned long systemInfo::getUsedMemory()
+unsigned long SystemInfo::getUsedMemory()
 {
     unsigned long FreeMemory = 0;
     unsigned long TotalMemory = 0;
@@ -133,7 +133,7 @@ unsigned long systemInfo::getUsedMemory()
  * @note : This funtion is written for Linux OS.
  * @warning 
  */
-int systemInfo::getRunningProcesses()
+int SystemInfo::getRunningProcesses()
 {
     int TotalProcesses = -1;
     int fd = open(STAT_INFO_FILE, O_RDONLY);

@@ -4,10 +4,9 @@
 using namespace std;
 int main()
 {
-    systemInfo sysInfo;
-    cout << "*********** mem free info " << sysInfo.getFreeMemory() << endl;
-    cout << " ************ Used memeory info " << sysInfo.getUsedMemory() << endl;
-    cout << " ************ Total Process info " << sysInfo.getRunningProcesses() << endl;
+    cout << "System Free Memory: " << SystemInfo::getFreeMemory() <<" KB"<< endl;
+    cout << "System Used Memory: " << SystemInfo::getUsedMemory() <<" KB"<< endl;
+    cout << "System Number of running processes: " << SystemInfo::getRunningProcesses() <<endl;
 
     return 0;
 }

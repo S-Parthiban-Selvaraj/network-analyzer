@@ -1,11 +1,12 @@
 #ifndef SYSTEMINFO_H
 #define SYSTEMINFO_H
 
-class systemInfo{
+class SystemInfo{
     public:
-        unsigned long getFreeMemory();
-        unsigned long getUsedMemory();
-        int getRunningProcesses();
+        // Creating below functions as static 
+        static unsigned long getFreeMemory();
+        static unsigned long getUsedMemory();
+        static int getRunningProcesses();
 };
 
 #endif
