@@ -5,6 +5,7 @@
 #include "SystemInfo.h"
 
 #define MEM_INFO_FILE "/proc/meminfo"
+#define STAT_INFO_FILE "/proc/stat"
 using namespace std;
 
 /*
@@ -14,7 +15,7 @@ using namespace std;
  * parses the free memory details. 
  *
  * @param : no parameters
- * @return : On success retuns the free memory in Kilo Bytes.
+ * @return : On success returns the free memory in Kilo Bytes.
  * @throws : 
  * @note : This funtion is written for Linux OS.
  * @warning 
@@ -29,34 +30,31 @@ unsigned long systemInfo::getFreeMemory()
         exit(EXIT_FAILURE);
     }
 
-    cout << "File Read Successful" << endl;
-
-    /* Assuming maximum buffer required to read /proc/meminfo will be 1024 bytes.
-     * And MemFree: feild will be in the biginning of the file. 
+    /* Reading /proc/meminfo for the memory details.
+     * And parsing "MemFree" feild. 
      */
     char buffer[1024] = {0};
-    ssize_t bytesRead = read(fd, buffer, sizeof(buffer)-1);
-    if (bytesRead == -1) 
+    ssize_t bytesRead =0;
+    while ((bytesRead= read(fd, buffer, sizeof(buffer)-1)) > 0)
     {
-        close(fd);
-        cerr << MEM_INFO_FILE << " file read failed" << endl;
-        exit(EXIT_FAILURE);
-    }
-    
-    //NULL terminate the buffer.
-    buffer[bytesRead] =  '\0';
-    cout << "bytesRead : " << bytesRead <<"\n  Buffer Read : \n" << buffer << endl;
-    // Parse "MemFree:" string to get the free emeory information
-    char* memFreeLine = strstr(buffer, "MemFree:");
-    if (memFreeLine) 
-    {
-        sscanf(memFreeLine, "MemFree: %lu kB", &FreeMemory);
-    } else 
-    {
-        cerr << " Couldn't read MemFree info. " << endl;
+        //NULL terminate the buffer.
+        buffer[bytesRead] =  '\0';
+
+        // Parse "MemFree:" string to get the free emeory information
+        char* memFreeLine = strstr(buffer, "MemFree:");
+        if (memFreeLine) 
+        {
+            sscanf(memFreeLine, "MemFree: %lu kB", &FreeMemory);
+            break;
+        } 
     }
 
     close(fd);
+    if (!FreeMemory) 
+    {
+        cerr << MEM_INFO_FILE << " file read failed" << endl;
+        exit(EXIT_FAILURE);
+    }
     return FreeMemory;
 }
 
@@ -67,7 +65,7 @@ unsigned long systemInfo::getFreeMemory()
  * calculates the used memory from Total and Free meory feilds. 
  *
  * @param : no parameters
- * @return : On success retuns the memory usage Kilo Bytes.
+ * @return : On success returns the memory usage Kilo Bytes.
  * @throws : 
  * @note : This funtion is written for Linux OS.
  * @warning 
@@ -83,46 +81,94 @@ unsigned long systemInfo::getUsedMemory()
         exit(EXIT_FAILURE);
     }
 
-    cout << "File Read Successful" << endl;
-
-    /* Assuming maximum buffer required to read /proc/meminfo will be 1024 bytes.
-     * And "MemFree" and "MemTotal": feilds will be in the biginning of the file. 
+    /* Reading /proc/meminfo for the memory details.
+     * And parsing "MemFree" and "MemTotal": feilds. 
      */
     char buffer[1024] = {0};
-    ssize_t bytesRead = read(fd, buffer, sizeof(buffer)-1);
-    if (bytesRead == -1) 
+    ssize_t bytesRead =0;
+    while ((bytesRead= read(fd, buffer, sizeof(buffer)-1)) > 0)
     {
-        close(fd);
+
+        //NULL terminate the buffer.
+        buffer[bytesRead] =  '\0';
+
+        // Parse "MemFree:" string to get the free emeory information
+        char* memFreeLine = strstr(buffer, "MemFree:");
+        if (memFreeLine && FreeMemory == 0)  
+        {
+            sscanf(memFreeLine, "MemFree: %lu kB", &FreeMemory);
+        }
+
+        // Parse "MemTotal:" string to get the free emeory information
+        char* memTotalLine = strstr(buffer, "MemTotal:");
+        if (memTotalLine && TotalMemory == 0)
+        {
+            sscanf(memTotalLine, "MemTotal: %lu kB", &TotalMemory);
+        } 
+
+        //Found both free and total meory deatails , break the loop
+        if(TotalMemory && FreeMemory)
+        {
+            break;
+        }
+    }
+    close(fd);
+
+    if (!TotalMemory || !FreeMemory ) 
+    {
         cerr << MEM_INFO_FILE << " file read failed" << endl;
         exit(EXIT_FAILURE);
     }
-    
-    //NULL terminate the buffer.
-    buffer[bytesRead] =  '\0';
-    cout << "bytesRead : " << bytesRead <<"\n  Buffer Read : \n" << buffer << endl;
-    // Parse "MemFree:" string to get the free emeory information
-    char* memFreeLine = strstr(buffer, "MemFree:");
-    if (memFreeLine) 
+    return (TotalMemory - FreeMemory);
+}
+
+/*
+ * @brief : getRunningProcesses returns the total number of running processes from the system.
+ *
+ * This funtions reads the /proc/stat file for the running processes info.
+ *
+ * @param : no parameters
+ * @return : On success returns the total number of running processes.
+ * @throws : 
+ * @note : This funtion is written for Linux OS.
+ * @warning 
+ */
+int systemInfo::getRunningProcesses()
+{
+    int TotalProcesses = -1;
+    int fd = open(STAT_INFO_FILE, O_RDONLY);
+    if (fd == -1) 
     {
-        sscanf(memFreeLine, "MemFree: %lu kB", &FreeMemory);
-    } else 
-    {
-        cerr << " Couldn't read MemFree info. " << endl;
+        cerr << STAT_INFO_FILE << " file open failed" << endl;
+        exit(EXIT_FAILURE);
     }
 
-    // Parse "MemTotal:" string to get the free emeory information
-    char* memTotalLine = strstr(buffer, "MemTotal:");
-    if (memFreeLine)
+    /* Assuming maximum buffer required to read /proc/stat file to get the system statistics info*/
+    char buffer[1024] = {0};
+    ssize_t bytesRead =0;
+    while ((bytesRead= read(fd, buffer, sizeof(buffer)-1)) > 0)
     {
-        sscanf(memTotalLine, "MemTotal: %lu kB", &TotalMemory);
-    } else
-    {
-        cerr << " Couldn't read MemFree info. " << endl;
-    }
 
+        //NULL terminate the buffer.
+        buffer[bytesRead] =  '\0';
+        // Parse "processes " string to get the running processes information
+        char* totalProcessLine = strstr(buffer, "processes ");
+        if (totalProcessLine) 
+        {
+            sscanf(totalProcessLine, "processes %d", &TotalProcesses);
+            break;
+        } 
+    }
 
     close(fd);
-    return (TotalMemory - FreeMemory);
+
+    if (TotalProcesses == -1) 
+    {
+        cerr << STAT_INFO_FILE << " file read failed" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    return TotalProcesses;
 }
 
 int main()
@@ -130,6 +176,7 @@ int main()
     systemInfo sysInfo;
     cout << "*********** mem free info " << sysInfo.getFreeMemory() << endl;
     cout << " ************ Used memeory info " << sysInfo.getUsedMemory() << endl;
+    cout << " ************ Total Process info " << sysInfo.getRunningProcesses() << endl;
 
     return 0;
 }
