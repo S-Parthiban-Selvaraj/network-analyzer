@@ -42,35 +42,9 @@ long NetworkInfo::timeToResolveHostname()
 
     if (err != 0) 
     {
-        cerr << "Failed to resolve hostname: " << gai_strerror(err) << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to resolve host name , Error : " + string(gai_strerror(err)));
     }
 
-#if 0    
-    //Debug logs
-    char ipv4[INET_ADDRSTRLEN];
-    struct sockaddr_in *addr4;
-    
-    /* IPv6 */
-    char ipv6[INET6_ADDRSTRLEN];
-    struct sockaddr_in6 *addr6;
-    cout << "Host Name " << hostname << " to below IP addresses :" << endl; 
-    for (; hostAddr != NULL; hostAddr = hostAddr->ai_next) 
-    { 
-        if (hostAddr->ai_addr->sa_family == AF_INET) 
-        {
-            addr4 = (struct sockaddr_in *) hostAddr->ai_addr;
-            inet_ntop(AF_INET, &addr4->sin_addr, ipv4, INET_ADDRSTRLEN);
-            cout << "IPv4 address :" << ipv4 << endl;
-        }
-        else if (hostAddr->ai_addr->sa_family == AF_INET6) 
-        {
-            addr6 = (struct sockaddr_in6 *) hostAddr->ai_addr;
-            inet_ntop(AF_INET6, &addr6->sin6_addr, ipv6, INET6_ADDRSTRLEN);
-            cout << "IPv6 address :" << ipv6 << endl;
-        }
-    }
-#endif
     freeaddrinfo(hostAddr); 
     
     return chrono::duration_cast<chrono::microseconds>(end - start).count();
@@ -99,15 +73,13 @@ long NetworkInfo::icmpRoundTripTime()
     int err = getaddrinfo(hostname.c_str(), NULL, &hints, &hostAddr);
     if (err != 0)
     {
-        cerr << "Failed to resolve hostname: " << gai_strerror(err) << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to resolve host name , Error : " + string(gai_strerror(err)));
     }
 
     //using the first address in the hostAddr list
     int sock = socket(hostAddr->ai_family, SOCK_DGRAM, IPPROTO_ICMP);
     if (sock < 0) {
-        cerr << "Failed to create socket" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to create socket " +  string(strerror(errno)));
     }
 
     char sendbuf[64] = {0};
@@ -122,8 +94,7 @@ long NetworkInfo::icmpRoundTripTime()
     auto start = chrono::high_resolution_clock::now(); 
     ssize_t sent = sendto(sock, sendbuf, sizeof(sendbuf), 0, hostAddr->ai_addr, hostAddr->ai_addrlen);
     if (sent < 0) {
-        cerr << "Failed to send ICMP packet" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to send ICMP echo packet " +  string(strerror(errno)));
     }
 
     char recvbuf[64] = {0};
@@ -134,8 +105,7 @@ long NetworkInfo::icmpRoundTripTime()
     freeaddrinfo(hostAddr);
 
     if (received < 0) {
-        cerr << "Failed to receive ICMP response" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("No reply received. ");
     }
 
     return chrono::duration_cast<chrono::microseconds>(end - start).count();
@@ -165,14 +135,12 @@ pair<long, std::string> NetworkInfo::tcpConnectTime(int port)
     int err = getaddrinfo(hostname.c_str(), to_string(port).c_str(), &hints, &hostAddr); 
     if (err != 0)
     {
-        cerr << "Failed to resolve hostname: " << gai_strerror(err) << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to resolve host name , Error : " + string(gai_strerror(err)));
     }
 
     int sock = socket(hostAddr->ai_family, SOCK_DGRAM, IPPROTO_ICMP);
     if (sock < 0) {
-        cerr << "Failed to create socket" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to create socket " +  string(strerror(errno)));
     }
 
 
@@ -183,8 +151,7 @@ pair<long, std::string> NetworkInfo::tcpConnectTime(int port)
    
     if (err < 0) 
     {
-        cerr << "Failed to connect to host" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to connect to the host : " +  string(strerror(errno)));
     } 
 
     //find the local interface bound to the socket
@@ -197,15 +164,13 @@ pair<long, std::string> NetworkInfo::tcpConnectTime(int port)
     //Get the addr details that the socket bound to locally
     if (getsockname(sock, (struct sockaddr*)&addr, &addr_len) == -1) 
     {
-        cerr << "getsockname Failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("getsockname failed : " +  string(strerror(errno)));
     }
 
     //Get all the system interfaces addr details
     if (getifaddrs(&ifaddr) == -1) 
     {
-        cerr << "getifaddrs Failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("getifaddrs failed : " +  string(strerror(errno)));
     }
 
     // Look for the interface containing the sockets's local IP.

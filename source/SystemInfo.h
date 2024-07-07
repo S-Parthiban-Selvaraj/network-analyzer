@@ -3,7 +3,7 @@
 
 class SystemInfo{
     public:
-        // Creating below functions as static 
+        // Creating functions as static since it is generic to the system
         static unsigned long getFreeMemory();
         static unsigned long getUsedMemory();
         static int getRunningProcesses();

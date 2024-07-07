@@ -26,8 +26,7 @@ unsigned long SystemInfo::getFreeMemory()
     int fd = open(MEM_INFO_FILE, O_RDONLY);
     if (fd == -1) 
     {
-        cerr << MEM_INFO_FILE << " file open failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to open file" + string(MEM_INFO_FILE));
     }
 
     /* Reading /proc/meminfo for the memory details.
@@ -52,8 +51,7 @@ unsigned long SystemInfo::getFreeMemory()
     close(fd);
     if (!FreeMemory) 
     {
-        cerr << MEM_INFO_FILE << " file read failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to Read file " + string(MEM_INFO_FILE));
     }
     return FreeMemory;
 }
@@ -77,8 +75,7 @@ unsigned long SystemInfo::getUsedMemory()
     int fd = open(MEM_INFO_FILE, O_RDONLY);
     if (fd == -1) 
     {
-        cerr << MEM_INFO_FILE << " file open failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to open file" + string(MEM_INFO_FILE));
     }
 
     /* Reading /proc/meminfo for the memory details.
@@ -116,8 +113,7 @@ unsigned long SystemInfo::getUsedMemory()
 
     if (!TotalMemory || !FreeMemory ) 
     {
-        cerr << MEM_INFO_FILE << " file read failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to read file" + string(MEM_INFO_FILE));
     }
     return (TotalMemory - FreeMemory);
 }
@@ -139,8 +135,7 @@ int SystemInfo::getRunningProcesses()
     int fd = open(STAT_INFO_FILE, O_RDONLY);
     if (fd == -1) 
     {
-        cerr << STAT_INFO_FILE << " file open failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to open file" + string(STAT_INFO_FILE));
     }
 
     /* Assuming maximum buffer required to read /proc/stat file to get the system statistics info*/
@@ -164,8 +159,7 @@ int SystemInfo::getRunningProcesses()
 
     if (TotalProcesses == -1) 
     {
-        cerr << STAT_INFO_FILE << " file read failed" << endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to read file" + string(STAT_INFO_FILE));
     }
 
     return TotalProcesses;
