@@ -3,4 +3,4 @@ project(network-probe)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(network-probe source/main.cpp source/SystemInfo.cpp)
+add_executable(network-probe source/main.cpp source/SystemInfo.cpp source/NetworkInfo.cpp)
