@@ -16,7 +16,7 @@ using namespace std;
  *
  * @param : no parameters
  * @return : On success returns the free memory in Kilo Bytes.
- * @throws : 
+ * @throws : runtime_error
  * @note : This funtion is written for Linux OS.
  * @warning 
  */
@@ -64,7 +64,7 @@ unsigned long SystemInfo::getFreeMemory()
  *
  * @param : no parameters
  * @return : On success returns the memory usage Kilo Bytes.
- * @throws : 
+ * @throws : runtime_error 
  * @note : This funtion is written for Linux OS.
  * @warning 
  */
@@ -125,7 +125,7 @@ unsigned long SystemInfo::getUsedMemory()
  *
  * @param : no parameters
  * @return : On success returns the total number of running processes.
- * @throws : 
+ * @throws : runtime_error
  * @note : This funtion is written for Linux OS.
  * @warning 
  */

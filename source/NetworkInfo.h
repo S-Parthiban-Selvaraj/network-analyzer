@@ -28,7 +28,7 @@ public:
 
     long timeToResolveHostname();
     long icmpRoundTripTime();
-    pair<long, string> tcpConnectTime(int port); //Returning the Ipadress and time taken in a pair
+    pair<long, string> tcpConnectTime(int port); //Returning the time taken and interface name in a pair
 };
 
 #endif

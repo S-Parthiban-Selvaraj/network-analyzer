@@ -24,7 +24,7 @@ using namespace std;
  *
  * @param : no parameters
  * @return : On success returns the the time taken to resolve the hostname in micro seconds.
- * @throws :
+ * @throws : runtime_error
  * @note : This funtion is written for Linux OS.
  * @warning
  */
@@ -58,7 +58,7 @@ long NetworkInfo::timeToResolveHostname()
  *
  * @param : no parameters
  * @return :  On success returns the the time taken to ICMP ping to the hostname in micro seconds.
- * @throws :
+ * @throws : runtime_error
  * @note : This funtion is written for Linux OS.
  * @warning
  */
@@ -120,7 +120,7 @@ long NetworkInfo::icmpRoundTripTime()
  *
  * @param : port number in integer
  * @return :  On success returns the the time taken for TCP connection and the interface name to create the connection in a std::pair
- * @throws :
+ * @throws : runtime_error
  * @note : This funtion is written for Linux OS.
  * @warning
  */
