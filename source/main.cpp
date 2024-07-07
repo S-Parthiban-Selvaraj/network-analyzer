@@ -5,13 +5,21 @@
 using namespace std;
 int main()
 {
-    cout << "System Free Memory: " << SystemInfo::getFreeMemory() <<" KB"<< endl;
-    cout << "System Used Memory: " << SystemInfo::getUsedMemory() <<" KB"<< endl;
-    cout << "System Number of running processes: " << SystemInfo::getRunningProcesses() <<endl;
+    cout << "System Info:" << endl;
+    cout << "\tFree Memory: " << SystemInfo::getFreeMemory() <<" KB"<< endl;
+    cout << "\tUsed Memory: " << SystemInfo::getUsedMemory() <<" KB"<< endl;
+    cout << "\tNumber of running processes: " << SystemInfo::getRunningProcesses() <<endl;
 
+    cout << "\n\n" << endl;
 
     NetworkInfo thousandEyes;
-    cout << "System Used Memory: " << thousandEyes.timeToResolveHostname() <<" µs"<< endl;
+    cout << "Network performance info of " << thousandEyes.getHostName() << " : "<< endl;
+    cout << "\tTime to resolve "<< thousandEyes.getHostName() << " : " << thousandEyes.timeToResolveHostname() <<" µs"<< endl;
+    cout << "\tICMP Round trip time to  "<< thousandEyes.getHostName() << " : " << thousandEyes.icmpRoundTripTime() <<" µs"<< endl;
     
+    NetworkInfo google("google.com");
+    cout << "Network performance info of " << google.getHostName() << " : "<< endl;
+    cout << "\tTime to resolve "<< google.getHostName() << " : " << google.timeToResolveHostname() <<" µs"<< endl;
+    cout << "\tICMP Round trip time to  "<< google.getHostName() << " : " << google.icmpRoundTripTime() <<" µs"<< endl;
     return 0;
 }

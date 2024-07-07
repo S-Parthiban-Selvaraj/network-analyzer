@@ -10,6 +10,7 @@ class NetworkInfo
 {
     string hostname; //Host name to be tested 
 public:
+    //If hostname is not passed set  it to default value.
     NetworkInfo()
     {
         hostname = "thousandeyes.com";
@@ -22,7 +23,11 @@ public:
     ~NetworkInfo()
     {
     }
+
+    const string& getHostName() const  { return hostname; }
+
     long timeToResolveHostname();
+    long icmpRoundTripTime();
 
 };
 
