@@ -42,7 +42,8 @@ long NetworkInfo::timeToResolveHostname()
         cerr << "Failed to resolve hostname: " << gai_strerror(err) << endl;
         exit(EXIT_FAILURE);
     }
-    
+
+#if 0    
     //Debug logs
     char ipv4[INET_ADDRSTRLEN];
     struct sockaddr_in *addr4;
@@ -66,20 +67,20 @@ long NetworkInfo::timeToResolveHostname()
             cout << "IPv6 address :" << ipv6 << endl;
         }
     }
-    
+#endif
     freeaddrinfo(hostAddr); 
     
     return chrono::duration_cast<chrono::microseconds>(end - start).count();
 }
 
 /*
- * @brief : icmpRoundTripTime calculates the round trip time for 
+ * @brief : icmpRoundTripTime calculates the round trip time for ICMP ping 
  *
- * This funtions reads the /proc/meminfo file for the memory info and
- * parses the free memory details.
+ * This funtions queries / resolve the hostname using getaddrinfo,
+ * And calculates the ICMP ping round trip time by sending ICMP message to resolved addr
  *
  * @param : no parameters
- * @return : On success returns the free memory in Kilo Bytes.
+ * @return :  On success returns the the time taken to ICMP ping to the hostname in micro seconds.
  * @throws :
  * @note : This funtion is written for Linux OS.
  * @warning
@@ -135,4 +136,56 @@ long NetworkInfo::icmpRoundTripTime()
     }
 
     return chrono::duration_cast<chrono::microseconds>(end - start).count();
+}
+
+
+/*
+ * @brief : tcpConnectTime calculates the time taken to create a TCP connection. 
+ *
+ * This funtions queries / resolve the hostname using getaddrinfo,
+ * And calculates the time taken to create a TCP connection to the addr.
+ *
+ * @param : port number in integer
+ * @return :  On success returns the the time taken for TCP connection and the interface name to create the connection in a std::pair
+ * @throws :
+ * @note : This funtion is written for Linux OS.
+ * @warning
+ */
+pair<long, std::string> NetworkInfo::tcpConnectTime(int port)
+{
+    addrinfo hints, *hostAddr;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC; //for any ip type (ipv4 or v6)
+    hints.ai_socktype = SOCK_STREAM;
+
+    // Pass the port number in c string format
+    int err = getaddrinfo(hostname.c_str(), to_string(port).c_str(), &hints, &hostAddr); 
+    if (err != 0)
+    {
+        cerr << "Failed to resolve hostname: " << gai_strerror(err) << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    int sock = socket(hostAddr->ai_family, SOCK_DGRAM, IPPROTO_ICMP);
+    if (sock < 0) {
+        cerr << "Failed to create socket" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+
+    //Staring the timer after dns resolve to calculate only the TCP connection time.
+    auto start = chrono::high_resolution_clock::now(); 
+    err = connect(sock, hostAddr->ai_addr, hostAddr->ai_addrlen);
+    auto end = chrono::high_resolution_clock::now();
+   
+    if (err < 0) 
+    {
+        cerr << "Failed to connect to host" << endl;
+        exit(EXIT_FAILURE);
+    } 
+
+    close(sock);
+    freeaddrinfo(hostAddr);
+
+    return {std::chrono::duration_cast<std::chrono::microseconds>(end - start).count(), "dummy"}; //return in a pair
 }
