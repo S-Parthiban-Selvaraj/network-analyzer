@@ -9,6 +9,9 @@
 #include <sys/socket.h>
 #include <netinet/ip_icmp.h>
 #include <unistd.h>
+#include <netinet/in.h>
+#include <ifaddrs.h>
+
 
 
 using namespace std;
@@ -184,8 +187,68 @@ pair<long, std::string> NetworkInfo::tcpConnectTime(int port)
         exit(EXIT_FAILURE);
     } 
 
+    //find the local interface bound to the socket
+    string interfaceName = "unknown";
+    
+    struct sockaddr_storage addr; //using sockaddr_storage struct to handle both Ipv4 and Ipv6
+    struct ifaddrs *ifaddr, *ifa;
+    socklen_t addr_len = sizeof(addr);
+
+    //Get the addr details that the socket bound to locally
+    if (getsockname(sock, (struct sockaddr*)&addr, &addr_len) == -1) 
+    {
+        cerr << "getsockname Failed" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    //Get all the system interfaces addr details
+    if (getifaddrs(&ifaddr) == -1) 
+    {
+        cerr << "getifaddrs Failed" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Look for the interface containing the sockets's local IP.
+    // When found, ifa->ifa_name contains the name of the interface that TCP connection is created.
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+    {
+        if(ifa->ifa_addr)
+        {
+            if (AF_INET == ifa->ifa_addr->sa_family) 
+            {
+                //cast to IPV4 struct
+                struct sockaddr_in *inaddr = (struct sockaddr_in *)ifa->ifa_addr;
+                struct sockaddr_in *sock_inaddr = (struct sockaddr_in *)&addr;
+                if (inaddr->sin_addr.s_addr == sock_inaddr->sin_addr.s_addr) 
+                {
+                    if (ifa->ifa_name) 
+                    {
+                        interfaceName = ifa->ifa_name;
+                        break;
+                    }
+                }
+            }
+            else if(AF_INET6 == ifa->ifa_addr->sa_family) 
+            {
+                //cast to IPv6 struct
+                struct sockaddr_in6 *in6addr = (struct sockaddr_in6 *)ifa->ifa_addr;
+                struct sockaddr_in6 *sock_in6addr = (struct sockaddr_in6 *)&addr;
+
+                if (memcmp(&in6addr->sin6_addr, &sock_in6addr->sin6_addr, sizeof(struct in6_addr)) == 0)  
+                {
+                    if (ifa->ifa_name) 
+                    {
+                        interfaceName = ifa->ifa_name;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     close(sock);
     freeaddrinfo(hostAddr);
+    freeifaddrs(ifaddr);
 
-    return {std::chrono::duration_cast<std::chrono::microseconds>(end - start).count(), "dummy"}; //return in a pair
+    return {std::chrono::duration_cast<std::chrono::microseconds>(end - start).count(), interfaceName}; //return in a pair
 }
