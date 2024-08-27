@@ -138,7 +138,7 @@ pair<long, std::string> NetworkInfo::tcpConnectTime(int port)
         throw std::runtime_error("Failed to resolve host name , Error : " + string(gai_strerror(err)));
     }
 
-    int sock = socket(hostAddr->ai_family, SOCK_DGRAM, IPPROTO_ICMP);
+    int sock = socket(hostAddr->ai_family, SOCK_STREAM, 0);
     if (sock < 0) {
         throw std::runtime_error("Failed to create socket " +  string(strerror(errno)));
     }

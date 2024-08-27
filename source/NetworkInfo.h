@@ -13,7 +13,7 @@ public:
     //If hostname is not passed set  it to default value.
     NetworkInfo()
     {
-        hostname = "thousandeyes.com";
+        hostname = "google.com";
     }
     
     NetworkInfo(string hostName):hostname(move(hostName))

@@ -1,31 +1,31 @@
 # Network Probe
 
 ## Description
-`network-probe` is a utility that displays various system and network information when executed without arguments.
+`network-analyzer` is a utility that displays various system and network information when executed without arguments.
 
 ## Functionality
 - Amount of free and used memory.
 - Total number of running processes.
-- Time to resolve `thousandeyes.com` to an IP (in microseconds).
-- ICMP round trip time to `thousandeyes.com` (in microseconds).
-- Time to establish a TCP connection to `thousandeyes.com`, port 443 (in microseconds) and name of the ethernet interface where the TCP connection was established.
+- Time to resolve `google.com` to an IP (in microseconds).
+- ICMP round trip time to `google.com` (in microseconds).
+- Time to establish a TCP connection to `google.com`, port 443 (in microseconds) and name of the ethernet interface where the TCP connection was established.
 
 ## usage
 ```
-./network-probe
+./network-analyzer
 ```
 ## Sample Output
 ```
-./network-probe
+./network-analyzer
 System Info:
        Free Memory: 35235348 KB
         Used Memory: 492759052 KB
         Number of running processes: 562353898
 
-Network performance info of thousandeyes.com :
-        Time to resolve thousandeyes.com : 76105 µs
-        ICMP Round trip time to  thousandeyes.com : 8969 µs
-        Time to establish a TCP connection to  thousandeyes.com : 2 µs, using interface: eno1
+Network performance info of google.com :
+        Time to resolve google.com : 76105 µs
+        ICMP Round trip time to  google.com : 8969 µs
+        Time to establish a TCP connection to  google.com : 2 µs, using interface: eno1
 ```     
 
 ## Build Instructions
@@ -33,11 +33,11 @@ Network performance info of thousandeyes.com :
 The project is configured using CMake. Below is the CMakeLists.txt file used for this project:
 ```
 cmake_minimum_required(VERSION 3.10)
-project(network-probe)
+project(network-analyzer)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(network-probe source/main.cpp source/SystemInfo.cpp source/NetworkInfo.cpp)
+add_executable(network-analyzer source/main.cpp source/SystemInfo.cpp source/NetworkInfo.cpp)
 
 ```
 ### Prerequisites
@@ -57,11 +57,11 @@ make
 This repository contains two classes, NetworkInfo and SystemInfo, designed to gather network and system-related information. The NetworkInfo class provides methods to measure various network metrics for a given hostname, while the SystemInfo class provides static methods to retrieve system information.
 
 ## NetworkInfo
-The NetworkInfo class is designed to measure network-related metrics for a specified hostname. If no hostname is provided, it defaults to "thousandeyes.com".
+The NetworkInfo class is designed to measure network-related metrics for a specified hostname. If no hostname is provided, it defaults to "google.com".
 
 ### Methods
 ### Constructors:
-- `NetworkInfo():` Initializes the NetworkInfo object with the default hostname (`thousandeyes.com`).
+- `NetworkInfo():` Initializes the NetworkInfo object with the default hostname (`google.com`).
 - `NetworkInfo(string hostName):` Initializes the NetworkInfo object with the specified hostname.
 ### Destructor:
 - `~NetworkInfo():` Destructor for the NetworkInfo object.

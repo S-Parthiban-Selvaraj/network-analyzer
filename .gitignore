@@ -3,5 +3,5 @@ CMakeFiles/**
 CMakeCache.txt
 Makefile
 cmake_install.cmake
-network-probe
+network-analyzer
 build/**
